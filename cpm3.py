@@ -7,15 +7,18 @@ import re
 import random
 
 from calib import convert_to_pressure, import_HCL_data
-
+from Table import Tableread, import_PSI
 global RHO
 
 K_1 = 1.3
 A_PLUS = 26
 KIN_VIS = 14.9e-6
 RHO = 1.2
+CHORD_LENGTH = 0.2
 
 TIMEAXIS = 0
+xc_pos = [0.21, 0.32, 0.41]
+pos_table = Tableread("pos.txt", format = ['f', 'f'], separator = '\t', skiplines=2)
 
 diameters_mm = [0.5,0.8,1]
 diameters = [i / 1000 for i in diameters_mm]
@@ -38,9 +41,13 @@ for file_entry in os.scandir(DATA_DIR):
 
 			measurements.append(groups)
 
-Vel_set = set(([i[0] for i in measurements]))
-AoA_set = set(([i[1] for i in measurements]))
-Pos_set = set(([i[2] for i in measurements]))
+Vel_set = list(set(([i[0] for i in measurements])))
+AoA_set = list(set(([i[1] for i in measurements])))
+Pos_set = list(set(([i[2] for i in measurements])))
+
+Vel_set.sort()
+AoA_set.sort()
+Pos_set.sort()
 
 # def stoch_grad_descent(f, initial_value):
 #	 x = random.randint()
@@ -82,20 +89,20 @@ def cpm_estimation(K,q_target, p_grad, d):
 
 	return tau_w
 
-def check(tab, k_i, i):
+def check(tab, k_i, i, p_grad):
 	q = convert_to_pressure(i, tab['avg'][i])
 	print("Q: ", q)
-	return cpm_estimation(k_i, q, 0, diameters[i])
+	return cpm_estimation(k_i, q, p_grad, diameters[i])
 
 
-def cpm3_iter(tab,k):
-	taus = [check(tab, k, i) for i in range(3)]
+def cpm3_iter(tab,k, p_grad):
+	taus = [check(tab, k, i, p_grad) for i in range(3)]
 	print(taus)
 	tau = np.average(taus)
 	curr_error = sum([abs(i - tau) for i in taus])/tau
 	return tau, k, curr_error
 
-def calc_cpm3(tab):
+def calc_cpm3(tab, p_grad):
 	global RHO
 	tab['avg'] = np.mean(tab['data'], axis=TIMEAXIS)
 	tab['std'] = np.std(tab['data'], axis=TIMEAXIS)
@@ -104,11 +111,11 @@ def calc_cpm3(tab):
 	k = 0.4
 	n = 3
 	
-	tau, k, error = cpm3_iter(tab, k)
+	tau, k, error = cpm3_iter(tab, k, p_grad)
 
 	while n < 1000:
-		new_tau_p, _, new_error_p = cpm3_iter(tab, k + 1/n)
-		new_tau_n, _, new_error_n = cpm3_iter(tab, k - 1/n)
+		new_tau_p, _, new_error_p = cpm3_iter(tab, k + 1/n, p_grad)
+		new_tau_n, _, new_error_n = cpm3_iter(tab, k - 1/n, p_grad)
 
 		if new_error_p < error:
 			k = k + 1/n
@@ -133,8 +140,11 @@ print(AoA_set)
 
 print(measurements)
 
-os.remove("res.txt")
-f = open("res.txt", "x")
+try:
+	f = open("res.txt", "x")
+except:
+	f = open("res.txt", "w")
+
 f.write("vel\tAoA\tpos\ttau\tk\terror\n\n")
 for vel in Vel_set: 
 	for pos in Pos_set:
@@ -143,10 +153,15 @@ for vel in Vel_set:
 				# if a given combination doesn't exist, skip it
 				continue
 			
+			p_filename = DATA_DIR + "/" + f"PSI_{vel}_ms_{AoA}_deg_Pos{pos}.dat"
 			filename = DATA_DIR + "/" + f"HCL_{vel}_ms_{AoA}_deg_Pos{pos}.dat"
+
+			
 			print(filename)
 			hcl_data = import_HCL_data(filename)
-			
-			tau, k, error = calc_cpm3(hcl_data)
+			p_data = import_PSI(p_filename)
+			i = int(pos) + 8
+			p_grad = p_data['p'][i+1] - p_data['p'][i-1] / (pos_table[i+1][0]-pos_table[i-1][0]) / CHORD_LENGTH
+			tau, k, error = calc_cpm3(hcl_data, p_grad)
 			f.write(f"{vel}\t{AoA}\t{pos}\t{tau}\t{k}\t{error}\n")
 
