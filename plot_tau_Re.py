@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 from Table import Tableread, import_PSI
 from calib import import_HCL_data
 
+plt.rcParams.update({'font.size': 14})
+
 RESULT_FILE = sys.argv[1] if len(sys.argv) > 1 else "res.txt"
 DATA_DIR = sys.argv[2] if len(sys.argv) > 2 else "data_UTF8"
 
@@ -66,7 +68,7 @@ for vel in [10,15]:
 
 plt.ylabel("Wandschubspannung $\\tau_w$ [$N/m^2$]")
 plt.xlabel("Reynoldszahl [Re]")
-plt.legend()
+plt.legend(fontsize=10)
 plt.savefig(f"images/tau_over_re{ADD}.eps", format="eps")
 plt.clf()
 plt.close()
@@ -79,7 +81,7 @@ for vel in [10,15]:
 
 plt.ylabel("Reibungskoeffizient $C_f$ [-]")
 plt.xlabel("Reynoldszahl $Re$ [-]")
-plt.legend()
+plt.legend(fontsize=10)
 plt.savefig(f"images/cf_over_re{ADD}.eps", format="eps")
 plt.clf()
 plt.close()
@@ -92,7 +94,7 @@ for vel in [10,15]:
 
 plt.xlabel("Reynoldszahl [Re]")
 plt.xlabel("Residual of the CPM3 Method [-]")
-plt.legend()
+plt.legend(fontsize=10)
 plt.savefig(f"images/error_over_re{ADD}.eps", format="eps")
 plt.clf()
 plt.close()
