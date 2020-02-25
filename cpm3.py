@@ -17,6 +17,8 @@ RHO = 1.2
 CHORD_LENGTH = 0.2
 
 TIMEAXIS = 0
+LIMIT_K = True
+
 xc_pos = [0.21, 0.32, 0.41]
 pos_table = Tableread("pos.txt", format = ['f', 'f'], separator = '\t', skiplines=2)
 
@@ -99,7 +101,7 @@ def cpm3_iter(tab,k, p_grad):
 	taus = [check(tab, k, i, p_grad) for i in range(3)]
 	print(taus)
 	tau = np.average(taus)
-	curr_error = sum([abs(i - tau) for i in taus])/tau
+	curr_error = np.sqrt(sum([abs(i - tau)**2 for i in taus]))/tau
 	return tau, k, curr_error
 
 def calc_cpm3(tab, p_grad):
@@ -131,6 +133,13 @@ def calc_cpm3(tab, p_grad):
 			n *= 2
 
 		n += 1
+
+	if LIMIT_K:
+		if k > 1:
+			tau, k, error = cpm3_iter(tab, 1, p_grad)
+		
+		if k < 0:
+			tau, k, error = cpm3_iter(tab, 0, p_grad)
 
 	return (tau, k, error)
 
@@ -164,4 +173,6 @@ for vel in Vel_set:
 			p_grad = p_data['p'][i+1] - p_data['p'][i-1] / (pos_table[i+1][0]-pos_table[i-1][0]) / CHORD_LENGTH
 			tau, k, error = calc_cpm3(hcl_data, p_grad)
 			f.write(f"{vel}\t{AoA}\t{pos}\t{tau}\t{k}\t{error}\n")
+
+		
 
