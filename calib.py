@@ -66,7 +66,7 @@ if __name__ == "__main__":
 
     calib_dir = os.scandir(CALIB_DATA_PATH)
     for i in calib_dir:
-        delta_p = float(i.name[4:].split("_mbar")[0]) * 100 #Umrechnung von [mbar] zu [Pa]
+        delta_p = float(i.name[4:].split("_mbar")[0])
         delta_p_list.append(delta_p)
 
     delta_p_list.sort()
@@ -74,7 +74,7 @@ if __name__ == "__main__":
     for delta_p in delta_p_list:
         print(delta_p)
         print(int(delta_p))
-        filename = "KAL_" + str(int(delta_p/100)).zfill(3) + "_mbar.dat"
+        filename = "KAL_" + str(int(delta_p)).zfill(3) + "_mbar.dat"
         path = os.path.join(CALIB_DATA_PATH, filename)
         tab = import_HCL_data(path)
         print(f"Kalibrationspunkt {delta_p} Pa")
