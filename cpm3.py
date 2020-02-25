@@ -101,7 +101,7 @@ def cpm3_iter(tab,k, p_grad):
 	taus = [check(tab, k, i, p_grad) for i in range(3)]
 	print(taus)
 	tau = np.average(taus)
-	curr_error = np.sqrt(sum([abs(i - tau)**2 for i in taus]))/tau
+	curr_error = np.sqrt(sum([abs(i - tau)**2 for i in taus]))
 	return tau, k, curr_error
 
 def calc_cpm3(tab, p_grad):

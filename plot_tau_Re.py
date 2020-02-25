@@ -61,6 +61,7 @@ def cplot(x,y):
     style_idx += 1
 
 
+fig = plt.figure(figsize=(8,6))
 for vel in [10,15]:
     for AoA in [6,10]:
         label = f"${vel} m/s$ mit {AoA}° Anstellwinkel"
@@ -74,6 +75,8 @@ plt.clf()
 plt.close()
 
 style_idx = 0
+fig = plt.figure(figsize=(8,6))
+
 for vel in [10,15]:
     for AoA in [6,10]:
         label = f"${vel} m/s$ mit {AoA}° Anstellwinkel"
@@ -87,13 +90,14 @@ plt.clf()
 plt.close()
 
 style_idx = 0
+fig = plt.figure(figsize=(8,6))
 for vel in [10,15]:
     for AoA in [6,10]:
         label = f"${vel} m/s$ mit {AoA}° Anstellwinkel"
         cplot(plot_data[(AoA,vel)][0], plot_data[(AoA,vel)][-1])
 
 plt.xlabel("Reynoldszahl [Re]")
-plt.xlabel("Residual of the CPM3 Method [-]")
+plt.xlabel("Residuen der CPM3 Methode [$(N/m^2)$]")
 plt.legend(fontsize=10)
 plt.savefig(f"images/error_over_re{ADD}.eps", format="eps")
 plt.clf()

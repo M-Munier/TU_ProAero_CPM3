@@ -101,8 +101,8 @@ if __name__ == "__main__":
         averages =      [calib_data[dp]['avg'][sensor_idx] for dp in delta_p_list]
         deviations_3 =    [calib_data[dp]['std'][sensor_idx] * 3 for dp in delta_p_list]
 
-        calib_coefficients = np.polyfit(delta_p_list, averages, deg=1)
-
+        calib_coefficients, res = np.polyfit(delta_p_list, averages, deg=1, full=True)
+        print(res)
         print(f"Sensor {sensor_idx}:")
         print(f"Coefficients: {calib_coefficients}")
 
